@@ -31,12 +31,12 @@ find_package(GTest CONFIG REQUIRED)
 # TODO: change template word to project name and delete this comment
 add_library(template STATIC
   # enum your files and delete this comment
-        include/SelfSharedPtr.cpp include/SelfSharedPtr.hpp)
+        sources/SelfSharedPtr.cpp include/SelfSharedPtr.hpp)
 add_executable(tests
   # TODO: enum your files and delete this comment
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
-        include/SelfSharedPtr.cpp include/SelfSharedPtr.hpp)
-add_executable(main sources/main.cpp sources/main.cpp)
+        sources/SelfSharedPtr.cpp include/SelfSharedPtr.hpp)
+#add_executable(main sources/main.cpp sources/main.cpp)
 # TODO: change template word to project name and delete this comment
 target_include_directories(template 
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -44,9 +44,9 @@ target_include_directories(template
 target_include_directories(tests 
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-target_include_directories(main
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-        )
+#target_include_directories(main
+#        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+#        )
 # TODO: change template word to project name and delete this comment
 target_link_libraries(tests GTest::main template)
 

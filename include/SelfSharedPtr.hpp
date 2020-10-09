@@ -15,22 +15,19 @@ class SelfSharedPtr {
   SelfSharedPtr(SelfSharedPtr&& r);
   ~SelfSharedPtr();
 
-  auto operator = (const SelfSharedPtr& r) -> SelfSharedPtr&;
-  auto operator = (SelfSharedPtr&& r) -> SelfSharedPtr&;
+  auto operator=(const SelfSharedPtr& r) -> SelfSharedPtr&;
+  auto operator=(SelfSharedPtr&& r) -> SelfSharedPtr&;
 
-
-  // проверяет, указывает ли указатель на объект
   operator bool() const;
   auto operator*() const -> T&;
-  auto operator->() const -> T*;//?
+  auto operator->() const -> T*;
 
   auto get() const -> T*;
   void reset();
   void reset(T* ptr);
   void swap(SelfSharedPtr& r);
-  // возвращает количество объектов SharedPtr,
-  // которые ссылаются на тот же управляемый объект
-  auto use_count() const -> size_t;
+
+  auto useCount() const -> size_t;
 
  private:
   T* object;
@@ -56,7 +53,9 @@ SelfSharedPtr<T>::SelfSharedPtr(
 template <typename T>
 SelfSharedPtr<T>::SelfSharedPtr(
     T *ptr):object(ptr),
-              count_of_links(new std::atomic<uint>(1)) {}
+              count_of_links(new std::atomic<uint>) {
+  *count_of_links = 1;
+}
 
 template <typename T>
 SelfSharedPtr<T>::~SelfSharedPtr<T>() {
@@ -64,16 +63,15 @@ SelfSharedPtr<T>::~SelfSharedPtr<T>() {
     if (*count_of_links == 1) {
       delete count_of_links;
       count_of_links = nullptr;
-      //delete object;
       object = nullptr;
-    }else {
-      --*count_of_links;
+    } else {
+      --(*count_of_links);
     }
   }
 }
 
 template <typename T>
-SelfSharedPtr<T>::operator bool() const {return this->get();}
+SelfSharedPtr<T>::operator bool() const {return get();}
 
 template <typename T>
 auto SelfSharedPtr<T>::operator*() const -> T & {
@@ -89,14 +87,16 @@ auto SelfSharedPtr<T>::operator->() const -> T * {
 }
 
 template <typename T>
-auto SelfSharedPtr<T>::get() const -> T*{ return object; }
+auto SelfSharedPtr<T>::get() const -> T*{
+  return object;
+}
 
 template <typename T>
 void SelfSharedPtr<T>::reset() {
   if (count_of_links != nullptr) {
     object = nullptr;
     if (*count_of_links != 1) {
-      --*count_of_links;
+      --(*count_of_links);
     }else{
       delete count_of_links;
     }
@@ -107,32 +107,33 @@ void SelfSharedPtr<T>::reset() {
 template <typename T>
 void SelfSharedPtr<T>::reset(T *ptr) {
   if (count_of_links != nullptr) {
-    --*count_of_links;
+    --(*count_of_links);
   }
-  count_of_links = new std::atomic<uint>(1);
+  count_of_links = new std::atomic<uint>;
+  *count_of_links = 1;
   object = ptr;
 }
 
 template <typename T>
-auto SelfSharedPtr<T>::operator = (const SelfSharedPtr& r) -> SelfSharedPtr&{
+auto SelfSharedPtr<T>::operator=(const SelfSharedPtr& r) -> SelfSharedPtr&{
   object = r.get();
   if (count_of_links != nullptr){
-    --*count_of_links;
+    --(*count_of_links);
   }
   count_of_links = r.count_of_links;
-  ++*count_of_links;
-  return *this;
+  ++(*count_of_links);
+  return get();
 }
 
 template <typename T>
-auto SelfSharedPtr<T>::operator = (SelfSharedPtr&& r) -> SelfSharedPtr& {
+auto SelfSharedPtr<T>::operator=(SelfSharedPtr&& r) -> SelfSharedPtr& {
   object = std::move(r.object);
   if (this->count_of_links != nullptr){
-    --*count_of_links;
+    --(*count_of_links);
   }
   count_of_links = std::move(r.count_of_links);
-  ++*count_of_links;
-  return *this;
+  ++(*count_of_links);
+  return get();
 }
 
 template <typename T>
@@ -145,6 +146,8 @@ void SelfSharedPtr<T>::swap(SelfSharedPtr<T> &r) {
 }
 
 template <typename T>
-auto SelfSharedPtr<T>::use_count() const -> size_t { return *count_of_links;}
+auto SelfSharedPtr<T>::useCount() const -> size_t {
+  return *count_of_links;
+}
 
 #endif  //  INCLUDE_SELFSHAREDPTR_HPP_
