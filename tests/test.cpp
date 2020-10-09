@@ -49,3 +49,8 @@ TEST(SelfSharedPtr, funcBool){
   ASSERT_EQ(A, false);
 }
 
+TEST(SelfSharedPtr, funcThrow){
+  SelfSharedPtr<int> A;
+  ASSERT_THROW(*A, std::out_of_range);
+}
+
